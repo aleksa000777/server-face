@@ -16,6 +16,7 @@ var myApp = new Clarifai.App(
 app.get('*', function (req, res) {
   let param = req.params["0"]
   let result
+  console.log('here');
   if (param == '/'){
     res.send("Server running")
   }
