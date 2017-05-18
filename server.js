@@ -2,6 +2,8 @@ var express = require('express')
 var app = express()
 require('dotenv').config()
 
+var port =  process.env.PORT || 3000
+
 var Clarifai = require('clarifai');
 
 // instantiate a new Clarifai app passing in your clientId and clientSecret
@@ -10,10 +12,6 @@ var myApp = new Clarifai.App(
   process.env.CLIENT_SECRET
 );
 
-
-app.get("/", function (req, res) {
-  res.send("Server running")
-});
 
 app.get('*', function (req, res) {
   let param = req.params["0"]
@@ -41,6 +39,6 @@ app.get('*', function (req, res) {
 
 
 
-app.listen(3000, function () {
+app.listen(port, function () {
   console.log('Example app listening on port 3000!')
 })
