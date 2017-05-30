@@ -45,7 +45,7 @@ app.get('*', function (req, res) {
 })
 
 app.post('/', function(req, res, next){
-  let result
+  let result='hello';
   req.pipe(concat(function(data){
     var image64 = data.toString('base64');
     myApp.models.predict('e466caa0619f444ab97497640cefc4dc', "https://samples.clarifai.com/celebrity.jpeg").then(
@@ -53,7 +53,7 @@ app.post('/', function(req, res, next){
       function (response) {
         result = response.outputs[0].data.regions[0].data.face.identity.concepts[0]
         console.log('i am go through', result);
-        // res.send(JSON.stringify({ "hollyMew" : result }))
+        res.end(JSON.stringify(result))
       },
       function (err) {
         console.error(err)
