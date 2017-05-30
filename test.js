@@ -30,36 +30,30 @@ app.get('*', function (req, res) {
   if (param === '/') {
     res.send('Server running')
   } else {
-    // myApp.models.predict('e466caa0619f444ab97497640cefc4dc', '' + param.substring(1) + '').then(
-    //   function (response) {
-    //     console.log('success back end!!')
-    //     result = response.outputs[0].data.regions[0].data.face.identity.concepts[0]
-    //     // console.log(result)
-    //     res.send(JSON.stringify({ result }))
-    //   },
-    //   function (err) {
-    //     console.error(err)
-    //   }
-    // )
-  }
-})
-
-app.post('/', function(req, res, next){
-  let result
-  req.pipe(concat(function(data){
-    var image64 = data.toString('base64');
-    myApp.models.predict('e466caa0619f444ab97497640cefc4dc', "https://samples.clarifai.com/celebrity.jpeg").then(
-    // myApp.models.predict('e466caa0619f444ab97497640cefc4dc', {base64: "" + image64 +""}).then(
+    myApp.models.predict('e466caa0619f444ab97497640cefc4dc', '' + param.substring(1) + '').then(
       function (response) {
+        console.log('success back end!!')
         result = response.outputs[0].data.regions[0].data.face.identity.concepts[0]
-        console.log('i am go through', result);
-        // res.send(JSON.stringify({ "hollyMew" : result }))
+        console.log(result)
+        res.send(JSON.stringify({ result }))
       },
       function (err) {
         console.error(err)
       }
     )
-  }))
+  }
+})
+
+app.post('/', function(req, res, next){
+  console.log('yeeee');
+  req.pipe(concat(function(data){
+    req.body = data;
+    var key = new Date()
+    console.log(key);
+    // console.log('req.body',data.toString('base64'));
+    next()
+  }));
+  res.send(JSON.stringify({ data: 'data' }))
 })
 
 app.listen(port, function () {
