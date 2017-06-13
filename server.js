@@ -1,22 +1,12 @@
 var express = require('express')
-var concat = require('concat-stream');
-var bodyParser = require('body-parser')
 var app = express()
 require('dotenv').config()
 var Clarifai = require('clarifai')
+const formidable = require('express-formidable');
 
-
-// parse application/json
-app.use(bodyParser.json());
-// parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }));
-// parse the raw data
-app.use(bodyParser.raw());
-// parse text
-app.use(bodyParser.text());
+app.use(formidable());
 
 var port = process.env.PORT || 3000
-
 
 // instantiate a new Clarifai app passing in your clientId and clientSecret
 var myApp = new Clarifai.App(
@@ -24,42 +14,48 @@ var myApp = new Clarifai.App(
   process.env.CLIENT_SECRET
 )
 
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
 app.get('*', function (req, res) {
   let param = req.params['0']
   let result
   if (param === '/') {
     res.send('Server running')
-  } else {
-    // myApp.models.predict('e466caa0619f444ab97497640cefc4dc', '' + param.substring(1) + '').then(
-    //   function (response) {
-    //     console.log('success back end!!')
-    //     result = response.outputs[0].data.regions[0].data.face.identity.concepts[0]
-    //     // console.log(result)
-    //     res.send(JSON.stringify({ result }))
-    //   },
-    //   function (err) {
-    //     console.error(err)
-    //   }
-    // )
   }
 })
 
 app.post('/', function(req, res, next){
-  let result
-  req.pipe(concat(function(data){
-    var image64 = data.toString('base64');
-    myApp.models.predict('e466caa0619f444ab97497640cefc4dc', "https://samples.clarifai.com/celebrity.jpeg").then(
-    // myApp.models.predict('e466caa0619f444ab97497640cefc4dc', {base64: "" + image64 +""}).then(
+  if(req.fields.csv.length){
+    return myApp.models.predict('e466caa0619f444ab97497640cefc4dc', {base64: req.fields.csv }).then(
       function (response) {
-        result = response.outputs[0].data.regions[0].data.face.identity.concepts[0]
-        console.log('i am go through', result);
-        // res.send(JSON.stringify({ "hollyMew" : result }))
+        if(response.outputs){
+          result = response.outputs[0].data.regions[0].data.face.identity.concepts[0]
+          console.log(result);
+          res.end(JSON.stringify({ result }))
+          next();
+          return
+        }
+        else{
+          res.end(JSON.stringify({ "result":{"name":"Not found"} }))
+        }
       },
       function (err) {
-        console.error(err)
+        throw err
       }
-    )
-  }))
+    ).catch(function(err){
+      res.end(JSON.stringify({ "result":{"name":"error"} }))
+      next();
+      return
+    })
+  }
+  else{
+    res.end(JSON.stringify({ "result":{"name":"error on server"} }))
+  }
+return
 })
 
 app.listen(port, function () {
