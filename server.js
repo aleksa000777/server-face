@@ -33,8 +33,7 @@ app.post('/', function(req, res, next){
     return myApp.models.predict('e466caa0619f444ab97497640cefc4dc', {base64: req.fields.csv }).then(
       function (response) {
         if(response.outputs){
-          result = response.outputs[0].data.regions[0].data.face.identity.concepts[0]
-          console.log(result);
+          result = response.outputs[0].data.regions;
           res.end(JSON.stringify({ result }))
           next();
           return
