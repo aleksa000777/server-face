@@ -29,8 +29,9 @@ app.get('*', function (req, res) {
 })
 
 app.post('/', function(req, res, next){
+  let apiV = req.query.v === "celebrity" ? 'e466caa0619f444ab97497640cefc4dc' : 'c0c0ac362b03416da06ab3fa36fb58e3'
   if(req.fields.csv.length){
-    return myApp.models.predict('e466caa0619f444ab97497640cefc4dc', {base64: req.fields.csv }).then(
+    return myApp.models.predict(apiV, {base64: req.fields.csv }).then(
       function (response) {
         if(response.outputs){
           result = response.outputs[0].data.regions;
